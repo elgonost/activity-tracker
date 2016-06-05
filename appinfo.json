@@ -1,0 +1,37 @@
+{
+    "appKeys": {
+        "actTimeValueEnd": 7,
+        "actTimeValueStart": 6,
+        "activity": 8,
+        "activityNumber": 9,
+        "message": 1,
+        "status": 0,
+        "timevalue": 5,
+        "xvalue": 2,
+        "yvalue": 3,
+        "zvalue": 4
+    },
+    "capabilities": [
+        "configurable",
+        "health"
+    ],
+    "companyName": "kostaspetsasx@gmail.com",
+    "enableMultiJS": true,
+    "longName": "Activity Tracker",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "sdkVersion": "3",
+    "shortName": "Activity Tracker",
+    "targetPlatforms": [
+        "aplite",
+        "basalt",
+        "chalk"
+    ],
+    "uuid": "33ca2dbc-4afc-4a66-a72e-be0a2cfd26f8",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": false
+    }
+}
