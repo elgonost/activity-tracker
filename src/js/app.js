@@ -249,6 +249,8 @@ Pebble.addEventListener("appmessage", function(e) {
       zarray.length = 0;
       timearray.length = 0;
       
+      console.log("numberOfMessages = "+numberOfMessages+" (sends data on server when numberOfMessages equals 120)");
+      
       if(numberOfMessages==120){
         
         sendData = {"user":username,"type":activityType,"start":typeStart,"end":typeEnd,"startTime":typeStart[0],"endTime":typeEnd[typeEnd.length-1]};     
