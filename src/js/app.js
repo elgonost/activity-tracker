@@ -18,6 +18,8 @@ var possibleFall = false;
 var peakIndex = 0;
 var overlappingVectorSumLeft = [];
 var overlappingVectorSumRight = [];
+var numberOfFalls = 0;
+
 
 
 console.log("* * *Mobile phone says hello!!!* * *");
@@ -118,6 +120,7 @@ Pebble.addEventListener("appmessage", function(e) {
               console.log("fallDistance after impact was: "+fallDistance);
               if(fallDistance<=85.91){
                 console.log("FALL DETECTED. CALL FOR HELP!!");
+                numberOfFalls++;
               } 
         }
         else{
@@ -132,6 +135,7 @@ Pebble.addEventListener("appmessage", function(e) {
           console.log("fallDistance after impact was: "+fallDistance);
           if(fallDistance<=85.91){
             console.log("FALL DETECTED. CALL FOR HELP!!");
+            numberOfFalls++;
           } 
         }
       possibleFall = false; 
@@ -177,6 +181,7 @@ Pebble.addEventListener("appmessage", function(e) {
               console.log("fallDistance after impact was: "+fallDistance);
               if(fallDistance<=85.91){
                 console.log("FALL DETECTED. CALL FOR HELP!!");
+                numberOfFalls++;
               } 
             }
           }
@@ -251,11 +256,11 @@ Pebble.addEventListener("appmessage", function(e) {
       
       console.log("numberOfMessages = "+numberOfMessages+" (sends data on server when numberOfMessages equals 120)");
       
-      if(numberOfMessages==120){
+      if(numberOfMessages==60){
         
-        sendData = {"user":username,"type":activityType,"start":typeStart,"end":typeEnd,"startTime":typeStart[0],"endTime":typeEnd[typeEnd.length-1]};     
-        
-        request.open('POST','http://83.212.115.163:8080/tracker');
+        var fallsText = "Possible falls: " + numberOfFalls;
+        sendData = {"user":username,"type":activityType,"start":typeStart,"end":typeEnd,"startTime":typeStart[0],"endTime":typeEnd[typeEnd.length-1],"comment":fallsText};     
+        request.open('POST','http://83.212.115.163:8080/tracker',true);
         request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');   
         request.send(JSON.stringify(sendData));
          
@@ -263,6 +268,7 @@ Pebble.addEventListener("appmessage", function(e) {
         activityType.length = 0;
         typeStart.length = 0;
         typeEnd.length = 0;
+        numberOfFalls = 0;
       }
       
     }

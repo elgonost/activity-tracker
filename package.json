@@ -1,0 +1,41 @@
+{
+    "author": "kostaspetsasx@gmail.com",
+    "dependencies": {},
+    "keywords": [],
+    "name": "activity-tracker",
+    "pebble": {
+        "capabilities": [
+            "configurable",
+            "health"
+        ],
+        "displayName": "Activity Tracker",
+        "enableMultiJS": true,
+        "messageKeys": {
+            "actTimeValueEnd": 7,
+            "actTimeValueStart": 6,
+            "activity": 8,
+            "activityNumber": 9,
+            "message": 1,
+            "status": 0,
+            "timevalue": 5,
+            "xvalue": 2,
+            "yvalue": 3,
+            "zvalue": 4
+        },
+        "projectType": "native",
+        "resources": {
+            "media": []
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk"
+        ],
+        "uuid": "33ca2dbc-4afc-4a66-a72e-be0a2cfd26f8",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "1.0.0"
+}
