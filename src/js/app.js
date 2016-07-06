@@ -19,6 +19,7 @@ var peakIndex = 0;
 var overlappingVectorSumLeft = [];
 var overlappingVectorSumRight = [];
 var numberOfFalls = 0;
+var fallDetected = false;
 
 
 
@@ -42,7 +43,7 @@ function convertBytesToTime(byte6,byte5,byte4,byte3,byte2,byte1,byte0){
 // Function to send a message to the Pebble using AppMessage API
 // We are currently only sending a message using the "status" appKey defined in appinfo.json/Settings
 function sendMessage() {
-	Pebble.sendAppMessage({"status": 1}, messageSuccessHandler, messageFailureHandler);
+	Pebble.sendAppMessage({"status": 0}, messageSuccessHandler, messageFailureHandler);
 }
 
 // Called when the message send attempt succeeds
@@ -56,6 +57,15 @@ function messageFailureHandler() {
   sendMessage();
 }
 
+function geolocationSuccess(position){
+  var lat = position.coords.latitude;
+  var long = position.coords.longitude;
+  console.log("Latitude: "+ lat + " longitude: " + long);
+}
+
+function geolocationError(error) {
+  console.log("code: "    + error.code    + "\n" + "message:" + error.message + "\n");
+}
 
 
 Pebble.addEventListener('showConfiguration', function() {
@@ -106,7 +116,8 @@ Pebble.addEventListener("appmessage", function(e) {
         mean += Math.sqrt(Math.pow(xarray[i],2)  +  Math.pow(yarray[i],2)  +  Math.pow(zarray[i],2));
       }
       
-    
+      navigator.geolocation.getCurrentPosition(geolocationSuccess,[geolocationError]);
+           
       
       //**************************************************** fall detection ******************************************************************
       if(possibleFall){
@@ -120,6 +131,7 @@ Pebble.addEventListener("appmessage", function(e) {
               console.log("fallDistance after impact was: "+fallDistance);
               if(fallDistance<=85.91){
                 console.log("FALL DETECTED. CALL FOR HELP!!");
+                fallDetected = true;
                 numberOfFalls++;
               } 
         }
@@ -135,6 +147,7 @@ Pebble.addEventListener("appmessage", function(e) {
           console.log("fallDistance after impact was: "+fallDistance);
           if(fallDistance<=85.91){
             console.log("FALL DETECTED. CALL FOR HELP!!");
+            fallDetected = true;
             numberOfFalls++;
           } 
         }
@@ -181,6 +194,7 @@ Pebble.addEventListener("appmessage", function(e) {
               console.log("fallDistance after impact was: "+fallDistance);
               if(fallDistance<=85.91){
                 console.log("FALL DETECTED. CALL FOR HELP!!");
+                fallDetected = true;
                 numberOfFalls++;
               } 
             }
@@ -194,6 +208,11 @@ Pebble.addEventListener("appmessage", function(e) {
       //create overlapping window
       for(i=buffer_size-15;i<buffer_size;i++){
           overlappingVectorSumLeft.push(Math.sqrt(Math.pow(xarray[i],2)  +  Math.pow(yarray[i],2)  +  Math.pow(zarray[i],2)) );
+      }
+      
+      if(fallDetected){
+        Pebble.sendAppMessage({"status": 1}, messageSuccessHandler, messageFailureHandler);
+        fallDetected = false;
       }
       
       

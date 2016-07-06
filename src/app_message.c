@@ -17,6 +17,10 @@ static int s_battery_level;
 static TextLayer *s_battery_layer;
 
 static TextLayer *s_time_layer;
+static TextLayer *fall_layer;
+
+AppTimer *appTimer;
+
 DictionaryIterator *iter;
 bool js_flag = false;
 bool data_col = true;
@@ -129,6 +133,21 @@ static void battery_callback(BatteryChargeState state) {
   text_layer_set_text(s_battery_layer, s_buffer);
 }
 
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+  // A single click has just occured
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"Select key pressed");
+  app_timer_cancel(appTimer);
+  text_layer_set_text(fall_layer, " ");
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"AppTimer was Canceled");
+}
+
+static void click_config_provider(void *context) {
+  // Subcribe to button click events here
+  ButtonId id = BUTTON_ID_SELECT;  // The Select button
+  window_single_click_subscribe(id, select_click_handler);
+}
+
+
 
 
 static void data_handler(AccelData *data, uint32_t num_samples) {
@@ -194,6 +213,17 @@ static void data_handler(AccelData *data, uint32_t num_samples) {
     }
   }
 }
+
+
+void appTimerCallback(void *data){
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "AppTimer not cancelled. Sending email.");
+  vibes_short_pulse();
+  text_layer_set_text(fall_layer, " ");
+  //send email
+}
+
+
+
 // Called when a message is received from PebbleKitJS
 static void in_received_handler(DictionaryIterator *received, void *context) {
 	Tuple *tuple;
@@ -202,13 +232,26 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
 	if(tuple) {
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Status: %d", (int)tuple->value->uint32); 
 	}
-	
+  
+	if((int)tuple->value->uint32==0){
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "INITIALIZATION"); 
+    js_flag = true;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "JS_FLAG is set true");
+  }
+  if((int)tuple->value->uint32==1){
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "FALL DETECTED"); 
+    //alarm with vibration
+    vibes_short_pulse();
+    text_layer_set_text(fall_layer, "Are you alright?");
+    appTimer = app_timer_register(30000,appTimerCallback,NULL);    
+  }
+  
 	tuple = dict_find(received, MESSAGE_KEY);
 	if(tuple) {
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Message: %s", tuple->value->cstring);
 	}
-  js_flag = true;
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "JS_FLAG is set true");
+  
+  
 }
 
 // Called when an incoming message from PebbleKitJS is dropped
@@ -248,6 +291,13 @@ static void main_window_load(Window *window) {
   text_layer_set_overflow_mode(s_battery_layer, GTextOverflowModeWordWrap);
   text_layer_set_text_alignment(s_battery_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
+  
+  fall_layer = text_layer_create(GRect(0, 110, window_bounds.size.w - 10, window_bounds.size.h));
+  text_layer_set_font(fall_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+  //text_layer_set_text(fall_layer, "Are you alright?");
+  text_layer_set_overflow_mode(fall_layer, GTextOverflowModeWordWrap);
+  text_layer_set_text_alignment(fall_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(fall_layer));
     
 }
 
@@ -262,7 +312,7 @@ static void init(void) {
     .load = main_window_load,
     .unload = main_window_unload
   });  
-  //window_set_click_config_provider(s_window, (ClickConfigProvider) config_provider);
+  window_set_click_config_provider(s_window, click_config_provider);
 	window_stack_push(s_window, true);    
   update_time();
   battery_state_service_subscribe(battery_callback);
