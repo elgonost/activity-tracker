@@ -103,6 +103,12 @@ Pebble.addEventListener("appmessage", function(e) {
     var meanDistance = 0;
     var tempMinimum = 0;
     var fallDistance = 0;
+  
+  
+    if(e.payload.fallKey !== undefined){
+      //send email
+      console.log("JAVASCRIPT HERE: sending email");
+    }
     
     if(e.payload.timevalue !== undefined){
       

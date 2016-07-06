@@ -25,6 +25,7 @@ DictionaryIterator *iter;
 bool js_flag = false;
 bool data_col = true;
 bool activity_flag = false;
+bool fall = false;
 
 //Byte arrays
 uint8_t XBytes[XYZ_BYTE_ARRAY_SIZE];
@@ -34,6 +35,7 @@ uint8_t TimeBytes[TIME_BYTE_ARRAY_SIZE];
 
 int counter = 0;
 int timeCounter = 0;
+int dummy = 10;
 
 int act_index = 0;
 int select_counter = 0;
@@ -55,7 +57,8 @@ enum {
   TIME_VALUE_START = 6,
   TIME_VALUE_END = 7,
   ACTIVITY = 8,
-  ACTIVITY_NUMBER = 9
+  ACTIVITY_NUMBER = 9,
+  FALL_KEY = 10
 };
 
 struct byteForm{
@@ -219,6 +222,7 @@ void appTimerCallback(void *data){
   APP_LOG(APP_LOG_LEVEL_DEBUG, "AppTimer not cancelled. Sending email.");
   vibes_short_pulse();
   text_layer_set_text(fall_layer, " ");
+  fall = true;
   //send email
 }
 
@@ -264,6 +268,15 @@ static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reas
 
 // Called when PebbleKitJS acknowledges receipt of a message
 static void out_sent_handler(DictionaryIterator *iter, void *context) {
+  if(fall){
+    app_message_outbox_begin(&iter);
+    dict_write_int(iter,FALL_KEY,&dummy,sizeof(int),true);
+    dict_write_end(iter);
+    app_message_outbox_send();
+    fall=false;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "OUT_SENT_HANDLER HERE");     
+  }
+  
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -322,7 +335,7 @@ static void init(void) {
 	app_message_register_inbox_received(in_received_handler); 
 	app_message_register_inbox_dropped(in_dropped_handler); 
 	app_message_register_outbox_failed(out_failed_handler);
-  //app_message_register_outbox_sent(out_sent_handler);
+  app_message_register_outbox_sent(out_sent_handler);
 
   accel_data_service_subscribe(NUM_SAMPLES, data_handler);
   accel_service_set_sampling_rate(ACCEL_SAMPLING_25HZ);
