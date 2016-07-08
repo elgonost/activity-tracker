@@ -14,14 +14,17 @@ var sendData = {};
 var username = localStorage.getItem("username");
 var numberOfMessages = 0;
 var request = new XMLHttpRequest();
+var email = new XMLHttpRequest();
 var possibleFall = false;
 var peakIndex = 0;
 var overlappingVectorSumLeft = [];
 var overlappingVectorSumRight = [];
 var numberOfFalls = 0;
 var fallDetected = false;
-
-
+var location = "";
+var emailData = "";
+var lat = 0.0;
+var long = 0.0;
 
 console.log("* * *Mobile phone says hello!!!* * *");
 console.log(username);
@@ -58,9 +61,10 @@ function messageFailureHandler() {
 }
 
 function geolocationSuccess(position){
-  var lat = position.coords.latitude;
-  var long = position.coords.longitude;
+  lat = position.coords.latitude;
+  long = position.coords.longitude;
   console.log("Latitude: "+ lat + " longitude: " + long);
+  location = "Latitude: "+ lat + " longitude: " + long;
 }
 
 function geolocationError(error) {
@@ -102,12 +106,21 @@ Pebble.addEventListener("appmessage", function(e) {
     var meanCos = 0;
     var meanDistance = 0;
     var tempMinimum = 0;
-    var fallDistance = 0;
+    var fallDistance = 0;  
   
+    navigator.geolocation.getCurrentPosition(geolocationSuccess,[geolocationError]);
   
     if(e.payload.fallKey !== undefined){
       //send email
       console.log("JAVASCRIPT HERE: sending email");
+      //navigator.geolocation.getCurrentPosition(geolocationSuccess,[geolocationError]);
+      //emailData = username+" needs help ASAP. His location is: "+location;
+      console.log(emailData);
+      
+      email.open('POST','http://83.212.115.163/EmailSender.php?username='+username+'&latitude='+lat+'&longitude='+long,true);
+      email.setRequestHeader('Content-Type', 'application/json; charset=utf-8');   
+      email.send(/*JSON.stringify(emailData)*/);
+      
     }
     
     if(e.payload.timevalue !== undefined){
@@ -122,7 +135,7 @@ Pebble.addEventListener("appmessage", function(e) {
         mean += Math.sqrt(Math.pow(xarray[i],2)  +  Math.pow(yarray[i],2)  +  Math.pow(zarray[i],2));
       }
       
-      navigator.geolocation.getCurrentPosition(geolocationSuccess,[geolocationError]);
+      //navigator.geolocation.getCurrentPosition(geolocationSuccess,[geolocationError]);
            
       
       //**************************************************** fall detection ******************************************************************
