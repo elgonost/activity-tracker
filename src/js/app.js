@@ -12,9 +12,11 @@ var typeStart = [];
 var typeEnd = [];
 var sendData = {};
 var username = localStorage.getItem("username");
+//var email = "kostakiskakos@hotmail.com";
+var email = localStorage.getItem("email");
 var numberOfMessages = 0;
 var request = new XMLHttpRequest();
-var email = new XMLHttpRequest();
+var emailReq = new XMLHttpRequest();
 var possibleFall = false;
 var peakIndex = 0;
 var overlappingVectorSumLeft = [];
@@ -22,12 +24,13 @@ var overlappingVectorSumRight = [];
 var numberOfFalls = 0;
 var fallDetected = false;
 var location = "";
-var emailData = "";
+//var emailData = "";
 var lat = 0.0;
 var long = 0.0;
 
 console.log("* * *Mobile phone says hello!!!* * *");
 console.log(username);
+console.log(email);
 
 function convertBytesToAccel(msB,lsB){
   var temp = msB | 127;
@@ -73,7 +76,8 @@ function geolocationError(error) {
 
 
 Pebble.addEventListener('showConfiguration', function() {
-  var url = 'https://e088a03dc67dacfb01333eea79f5192d2b79960c.googledrive.com/host/0By0ivjD6euU1ZDlBLWZ4YmFMT2s/form.html';
+  //var url = 'https://e088a03dc67dacfb01333eea79f5192d2b79960c.googledrive.com/host/0By0ivjD6euU1ZDlBLWZ4YmFMT2s/form.html';
+  var url = 'http://83.212.115.163/config.html';
   console.log('Showing configuration page: '+ url);
   Pebble.openURL(url);
 });
@@ -85,6 +89,10 @@ Pebble.addEventListener('webviewclosed', function(e) {
   username = configData.userName;
   localStorage.setItem("username",username);
   console.log("username set: "+username);
+  
+  email = configData.email;
+  localStorage.setItem("email",email);
+  console.log("email set: "+email);
 });
 
 
@@ -115,11 +123,11 @@ Pebble.addEventListener("appmessage", function(e) {
       console.log("JAVASCRIPT HERE: sending email");
       //navigator.geolocation.getCurrentPosition(geolocationSuccess,[geolocationError]);
       //emailData = username+" needs help ASAP. His location is: "+location;
-      console.log(emailData);
+      //console.log(emailData);
       
-      email.open('POST','http://83.212.115.163/EmailSender.php?username='+username+'&latitude='+lat+'&longitude='+long,true);
-      email.setRequestHeader('Content-Type', 'application/json; charset=utf-8');   
-      email.send(/*JSON.stringify(emailData)*/);
+      emailReq.open('POST','http://83.212.115.163/EmailSender.php?username='+username+'&latitude='+lat+'&longitude='+long+'&email='+email,true);
+      emailReq.setRequestHeader('Content-Type', 'application/json; charset=utf-8');   
+      emailReq.send(/*JSON.stringify(emailData)*/);
       
     }
     
